@@ -1,0 +1,323 @@
+:root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --line: #1a1a1a; 
+    --accent: #000000;
+}
+
+/* 1. FORCE FONT CONSISTENCY EVERYWHERE */
+*, *::before, *::after {
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 80px 20px;
+    margin: 0;
+    -webkit-font-smoothing: antialiased; /* Smoother rendering on Mac */
+}
+
+.app-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3rem;
+    font-weight: 500;
+    margin-bottom: 40px;
+    opacity: 0.3;
+    text-align: center;
+}
+/* Minimalist Random Button Alignment */
+.btn-field {
+    display: flex;
+    align-items: flex-end; /* Aligns the button with the bottom of the input boxes */
+}
+
+/* Button Styling */
+.minimal-btn {
+    background: transparent;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #666;
+    padding: 0 14px;
+    height: 34px; /* Adjust this to perfectly match your input field heights */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover and Click States */
+.minimal-btn:hover {
+    background: #f8f9fa;
+    color: #111;
+    border-color: #bbb;
+}
+
+.minimal-btn:active {
+    transform: scale(0.95);
+}
+/* INPUTS */
+.input-group { 
+    display: flex; 
+    gap: 80px; 
+    margin-bottom: 100px; 
+    align-items: center;
+}
+
+.field { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+label { 
+    font-size: 0.6rem; 
+    font-weight: 700; 
+    opacity: 0.4; 
+    text-transform: uppercase; 
+    letter-spacing: 0.15rem;
+}
+
+input { 
+    border: none; 
+    border-bottom: 1px solid #eee; 
+    font-size: 2.2rem; 
+    width: 140px; 
+    text-align: center; 
+    outline: none; 
+    font-weight: 300; /* Match the fraction numbers */
+    color: var(--accent);
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+input:focus { 
+    border-bottom-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* FRACTION GRAPHIC */
+#fractionDisplay {
+    display: inline-block;
+}
+
+.fraction-grid {
+    display: inline-grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: start;
+}
+
+.a-plus-cell {
+    grid-column: 1;
+    grid-row: 2;
+    padding-right: 18px;
+    font-size: 1.8rem;
+    font-weight: 200; 
+    /* Precise alignment for Inter font */
+    transform: translateY(-56%); 
+    white-space: nowrap;
+    color: var(--text);
+    min-width: 60px;
+    text-align: right;
+}
+
+.numerator-cell {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: center;
+    padding: 0 25px 12px 25px;
+    font-size: 1.6rem;
+    font-weight: 300; /* Matching input weight */
+}
+
+.denominator-cell {
+    grid-column: 2;
+    grid-row: 2;
+    border-top: 1px solid var(--text);
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.terminal-dots {
+    display: block; /* Switched from flex to block for better text alignment */
+    text-align: center;
+    padding: 20px 0;
+    font-size: 1.5rem; /* Slightly larger so they match the visual weight better */
+    letter-spacing: 12px;
+    opacity: 0.7; /* Increased from 0.15 for much better visibility */
+    
+    /* The Magic Fix for horizontal alignment: */
+    /* This pushes the text slightly right to balance the letter-spacing on the right */
+    text-indent: 12px; 
+    margin-top: -12px;
+}
+
+footer {
+    margin-top: 100px;
+    padding-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.decimal-display {
+    font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--text);
+    opacity: 0.5; /* Keeps it subtle */
+    letter-spacing: 2px;
+}
+
+/* Optional: Add a subtle fade-in for the result */
+#decimalValue {
+    transition: opacity 0.2s ease;
+}
+
+.equation-wrapper {
+    display: flex;
+    align-items: center; /* Centers the = and formula vertically against the fraction */
+    justify-content: center;
+    gap: 40px;
+    min-height: 300px;
+}
+
+.exact-container {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    transition: all 0.5s ease;
+    /* Removed margin-top and column direction */
+}
+
+.equals-sign {
+    font-size: 2.5rem;
+    font-weight: 200;
+    opacity: 0.2;
+}
+
+.exact-formula {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.8rem; /* Increased to match .a-plus-cell size */
+    font-weight: 200;
+}
+
+/* Hide the 'Exact Value' label or keep it very subtle above the formula */
+.exact-label {
+    display: none; /* Removed to keep the equation clean */
+}
+
+.fraction-line-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center; /* This centers the num and den relative to each other */
+    vertical-align: middle;
+}
+
+.num {
+    /* Remove the fixed 15px side padding if it's causing unevenness */
+    padding: 0 5px 5px 5px; 
+    border-bottom: 1px solid var(--text);
+   text-align: center;
+    width: 100%; /* Ensures the border-bottom spans the full width of the content */
+}
+sub {
+    font-size: 0.6em;
+    vertical-align: sub;
+    line-height: 0; /* Prevents the subscript from adding height to the line */
+}
+
+/* Optional: Make the Bessel 'I' look more mathematical */
+i {
+    font-family: "Times New Roman", serif;
+    padding-right: 1px;
+}
+.den {
+    padding-top: 5px;
+    text-align: center;
+    width: 100%;
+}
+/* Container to group the SVG parens and the fraction */
+.paren-group {
+    display: inline-flex;
+    align-items: stretch; /* Forces the SVGs to stretch exactly to the fraction's height */
+    margin-left: 4px;
+}
+
+/* The SVG parentheses */
+.paren-svg {
+    width: 7px; /* Fixed width so they stay thin */
+    flex-shrink: 0;
+}
+
+/* Wrapper for the fraction */
+.paren-content {
+    display: flex;
+    align-items: center;
+    /* This padding gives the fraction breathing room so the parentheses are slightly taller than the fraction itself */
+    padding: 4px 2px; 
+}
+.subtitle {
+    font-size: 0.85em;
+    color: #888; /* Soft, muted gray */
+    margin-top: -10px; /* Pulls it up closer to the h1 */
+    margin-bottom: 64px; /* Gives breathing room before the inputs */
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    text-align: center; /* Assuming your header text is centered */
+}
+
+/* Optional: Make the "n" look a bit more mathematical */
+.subtitle i {
+    font-family: serif;
+    font-size: 1.1em;
+}
+/* Custom Square Root Styling */
+.sqrt-tick {
+    width: 12px;
+    height: 1.5em; /* Slightly taller to ensure the 'tick' clears the number */
+    flex-shrink: 0;
+    margin-right: -1px; /* Tiny overlap to prevent a white gap */
+    /* This ensures the 2px stroke doesn't scale with the SVG size */
+    vector-effect: non-scaling-stroke; 
+    shape-rendering: geometricPrecision;
+}
+.math-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.radicand {
+    /* Use an integer (2px) to match the SVG stroke-width exactly */
+    border-top: 1px solid var(--text); 
+    padding: 2px 4px 0 2px;
+    font-weight: 300;
+    line-height: 1.1;
+    display: inline-block;
+}
+
+.sqrt-wrapper {
+    display: inline-flex;
+    align-items: flex-start; /* Keeps the top of the tick and the line perfectly flush */
+    transform: translateY(2px); /* Nudges the whole radical down to align with the '+' */
+}
+
+
+.exact-integer {
+    font-size: 2.2rem;
+    font-weight: 200;
+    padding-left: 10px;
+}
+
