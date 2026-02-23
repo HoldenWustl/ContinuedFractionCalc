@@ -50,7 +50,7 @@ function buildFraction(exprA, exprB, depth, n) {
 
 const decimalValue = document.getElementById('decimalValue');
 
-function calculateValue(exprA, exprB, iterations = 1000, windowSize = 5) {
+function calculateValue(exprA, exprB, iterations = 2000, windowSize = 5) {
     // Helper function to calculate the result for a specific number of iterations
     const compute = (n) => {
         let val = evaluateExpression(exprA, n);
@@ -794,6 +794,17 @@ const KNOWN_FORMULAS = {
                 <span class="num"><i style="font-family: serif;">e</i></span>
                 <span class="den" style="display:flex; align-items:center; gap:4px;">
                     6 &minus; 2<i style="font-family: serif;">e</i>
+                </span>
+            </span>
+        </div>
+    `,
+    "2|(2n-1)^2+4": `
+        <div class="math-row" style="display:flex; align-items:center; gap:4px;">
+            <span>3 +</span>
+            <span class="fraction-line-wrapper">
+                <span class="num">4</span>
+                <span class="den" style="display:flex; align-items:center; gap:4px;">
+                    <i style="font-family: serif;">e</i><sup style="margin-left: 1px; margin-bottom: 20px;"><i style="font-family: serif;">π</i></sup> &minus; 1
                 </span>
             </span>
         </div>
