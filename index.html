@@ -1,64 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minimalist Fraction</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div class="app-container">
         <header>
             <h1>Continued Fractions</h1>
             <p class="subtitle">Use <i>n</i> for natural numbers</p>
-           <div class="input-group">
-    <div class="field">
-        <label>Adding Factor</label>
-        <input type="text" id="inputA" value="1" maxLength="30">
-    </div>
-    <div class="field">
-        <label>Dividing Factor</label>
-        <input type="text" id="inputB" value="1" maxLength="30">
-    </div>
-    <div class="field btn-field">
-        <button id="randomBtn" class="minimal-btn" title="Random Formula" aria-label="Randomize">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 3h5v5"></path>
-                <path d="M4 20L21 3"></path>
-                <path d="M21 16v5h-5"></path>
-                <path d="M15 15l6 6"></path>
-                <path d="M4 4l5 5"></path>
-            </svg>
-        </button>
-        
-    </div>
-    <div class="view-controls">
-    <label class="switch">
-        <input type="checkbox" id="viewToggle" checked>
-        <span class="slider"></span>
-    </label>
-    <span id="toggleLabel">Factored View</span>
-</div>
-</div>
-    
+            <div class="input-group">
+                <div class="field">
+                    <label>Adding Factor</label>
+                    <input type="text" id="inputA" value="1" maxLength="30">
+                    <div id="suggestA" class="pill-container"></div>
+                </div>
+                <div class="field">
+                    <label>Dividing Factor</label>
+                    <input type="text" id="inputB" value="1" maxLength="30">
+                    <div id="suggestB" class="pill-container"></div>
+                </div>
+
+                <div class="field btn-field">
+                    <button id="randomBtn" class="minimal-btn" title="Random Formula" aria-label="Randomize">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 3h5v5"></path>
+                            <path d="M4 20L21 3"></path>
+                            <path d="M21 16v5h-5"></path>
+                            <path d="M15 15l6 6"></path>
+                            <path d="M4 4l5 5"></path>
+                        </svg>
+                    </button>
+
+                </div>
+                <div class="view-controls">
+                    <label class="switch">
+                        <input type="checkbox" id="viewToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span id="toggleLabel">Factored View</span>
+                </div>
+            </div>
+
         </header>
 
         <main class="equation-wrapper">
-    <div id="fractionDisplay"></div>
-    
-    <div id="exactContainer" class="exact-container">
-        <span class="equals-sign">=</span>
-        <div id="exactFormula" class="exact-formula"></div>
+            <div id="fractionDisplay"></div>
+
+            <div id="exactContainer" class="exact-container">
+                <span class="equals-sign">=</span>
+                <div id="exactFormula" class="exact-formula"></div>
+            </div>
+        </main>
+        <footer>
+            <div id="decimalValue" class="decimal-display">0.000000...</div>
+            <div id="termCount" class="subtitle" id="termCount">First 0 terms</div>
+
+        </footer>
     </div>
-</main>
-            <footer>
-        <div id="decimalValue" class="decimal-display">0.000000...</div>
-        <div id="termCount" class="subtitle" id="termCount">First 0 terms</div>
-        
-    </footer>
-    </div>
-    
+
     <script src="script.js"></script>
 </body>
+
 </html>
