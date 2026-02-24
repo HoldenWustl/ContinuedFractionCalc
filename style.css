@@ -58,7 +58,10 @@ h1 {
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
+#termCount{
+    margin-top: 20px;
+    margin-bottom: 0;
+}
 /* Hover and Click States */
 .minimal-btn:hover {
     background: #f8f9fa;
@@ -212,6 +215,7 @@ footer {
     font-family: 'Inter', sans-serif;
     font-size: 1.8rem; /* Increased to match .a-plus-cell size */
     font-weight: 200;
+    width: max-content;
 }
 
 /* Hide the 'Exact Value' label or keep it very subtle above the formula */
@@ -321,3 +325,113 @@ i {
     padding-left: 10px;
 }
 
+
+.view-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* The switch container */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #2196F3; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+#toggleLabel { font-size: 0.9rem; color: #888; }
+
+/* Styling the substituted term count */
+.n-val {
+    color: #3182ce; /* Vibrant blue */
+    font-family: 'Courier New', Courier, monospace; /* Makes numbers look "calculated" */
+}
+
+/* Ensure the fraction cells don't collapse with the new spans */
+.a-plus-cell, .numerator-cell {
+    white-space: nowrap;
+}
+
+/* Typography & Alignments */
+.math-serif { font-family: serif; }
+.flex-row { display: flex; align-items: center; }
+.inline-flex-row { display: inline-flex; align-items: center; }
+
+/* Spacing Utilities */
+.gap-2 { gap: 2px; }
+.gap-4 { gap: 4px; }
+.gap-6 { gap: 6px; }
+.gap-8 { gap: 8px; }
+.pr-2 { padding-right: 2px; }
+.pt-1 { padding-top: 1px; }
+.ml-1 { margin-left: 1px; }
+
+/* Fraction & Math Scaling */
+.text-sm { font-size: 0.7em; }
+.scale-80 { transform: scale(0.8); }
+.inner-num { padding: 0 2px; border-bottom: 1px solid currentColor; }
+.sup-adjust { align-self: flex-start; margin-top: 2px; margin-left: 2px; font-size: 0.85em; }
+
+/* Square Root Utilities */
+.relative { position: relative; }
+.sqrt-index { position: absolute; font-size: 0.5em; top: -2px; left: -1px; }
+
+/* Additional Spacing & Flex */
+.flex { display: flex; }
+.ml-2 { margin-left: 2px; }
+
+/* Transforms */
+.translate-y-half { transform: translateY(-0.5em); }
+
+/* Custom Alignments & Margins */
+.mb-20 { margin-bottom: 20px; }
+.ml-n2 { margin-left: -2px; }
+
+/* Font Scaling & Positioning */
+.text-85 { font-size: 0.85em; }
+.cube-root-idx { font-size: 0.6em; position: absolute; left: -4px; top: 2px; }
+/* Flex Alignments */
+.justify-center { justify-content: center; }
+/* Flex Direction & Alignments */
+.flex-col { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+
+/* Padding Utilities */
+.px-2 { padding: 0 2px; }
+.px-4 { padding: 0 4px; }
+
+/* Structural */
+.fraction-line { height: 1px; width: 100%; background: currentColor; }
+
+/* Font Sizes & Specific Spacing */
+.text-12 { font-size: 1.2em; }
+.text-11 { font-size: 1.1em; }
+.text-07 { font-size: 0.7em; }
+.lh-0 { line-height: 0; }
+.mb-25 { margin-bottom: 25px; }
+.ml-2 { margin-left: 2px; }
