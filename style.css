@@ -435,3 +435,84 @@ input:checked + .slider:before { transform: translateX(20px); }
 .lh-0 { line-height: 0; }
 .mb-25 { margin-bottom: 25px; }
 .ml-2 { margin-left: 2px; }
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    /* 1. Reduce overall page padding */
+    body {
+        padding: 40px 15px;
+    }
+
+    /* 2. Allow inputs to sit closer together and wrap if necessary */
+    .input-group {
+        gap: 20px;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* 3. Scale down the input boxes slightly */
+    input {
+        width: 100px;
+        font-size: 1.8rem;
+    }
+
+    /* 4. Center the randomize button */
+    .btn-field {
+        align-items: center;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    /* 5. Stack the fraction and the exact formula vertically */
+    .equation-wrapper {
+        flex-direction: column;
+        gap: 30px;
+        width: 100%;
+        min-height: auto;
+        /* Allow horizontal scrolling if a fraction gets wildly deep */
+        overflow-x: auto; 
+        padding-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 6. Stack the equals sign above the exact formula */
+    .exact-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    /* 7. Slightly scale down the fraction text so it fits better */
+    .a-plus-cell {
+        font-size: 1.4rem;
+        padding-right: 12px;
+        min-width: 40px;
+    }
+
+    .numerator-cell {
+        font-size: 1.3rem;
+        padding: 0 15px 8px 15px;
+    }
+    .fraction-grid {
+        /* THE FIX: Forbids the grid from shrinking below its natural width */
+        min-width: max-content; 
+    }
+
+    .denominator-cell {
+        /* Ensures nested fractions also refuse to compress */
+        min-width: max-content;
+    }
+    /* 8. Adjust footer margins */
+    footer {
+        margin-top: 60px;
+    }
+    #fractionDisplay {
+        /* Ensure the fraction container itself handles the scrolling */
+        max-width: 100%;
+        overflow-x: auto;
+        /* Adds a little breathing room so the scrollbar doesn't clip the bottom */
+        padding-bottom: 20px; 
+    }
+}
