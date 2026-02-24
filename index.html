@@ -31,9 +31,17 @@
                 <path d="M4 4l5 5"></path>
             </svg>
         </button>
+        
     </div>
+    <div class="view-controls">
+    <label class="switch">
+        <input type="checkbox" id="viewToggle" checked>
+        <span class="slider"></span>
+    </label>
+    <span id="toggleLabel">Factored View</span>
 </div>
-
+</div>
+    
         </header>
 
         <main class="equation-wrapper">
@@ -46,6 +54,7 @@
 </main>
             <footer>
         <div id="decimalValue" class="decimal-display">0.000000...</div>
+        <div id="termCount" class="subtitle" id="termCount">First 0 terms</div>
         
     </footer>
     </div>
