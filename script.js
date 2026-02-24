@@ -279,11 +279,6 @@ function getDisplayText(expr, n, isForA = false) {
 
     let finalDisplay = processNode(formula);
 
-    // 7. Ultra-Tight Parentheses Logic for the 'a' term
-    if (isForA && !isLinear(formula) && hasTopLevelAddSub(formula) && !finalDisplay.startsWith('(')) {
-        return `(${finalDisplay})`;
-    }
-
     return finalDisplay;
 }
 
@@ -310,8 +305,7 @@ function buildFraction(exprA, exprB, depth, n) {
 const decimalValue = document.getElementById('decimalValue');
 const termCount = document.getElementById('termCount');
 
-function calculateValue(exprA, exprB, iterations = 2500, windowSize = 5) {
-    // Helper function to calculate the result for a specific number of iterations
+function calculateValue(exprA, exprB, iterations = 2500) {
     const compute = (n) => {
         let val = evaluateExpression(exprA, n);
         for (let i = n - 1; i >= 1; i--) {
@@ -322,45 +316,24 @@ function calculateValue(exprA, exprB, iterations = 2500, windowSize = 5) {
         return val;
     };
 
-    // 1. Collect a window of the last few convergents (e.g., 1000, 999, 998, 997, 996)
-    let convergents = [];
-    for (let i = 0; i < windowSize; i++) {
-        convergents.push(compute(iterations - i));
+    // 1. Calculate the gap at the halfway mark
+    let halfN = Math.floor(iterations / 2);
+    let gapHalf = Math.abs(compute(halfN) - compute(halfN - 1));
+
+    // 2. Calculate the gap at the very end
+    let gapFull = Math.abs(compute(iterations) - compute(iterations - 1));
+
+    // 3. The Plateau Test (Scale-Invariant)
+    // If the full gap is still 95%+ of the half gap, it has hit a wall.
+    // We also include a tiny base tolerance (1e-10) to prevent floating point noise 
+    // from triggering false positives on fast-converging fractions.
+    
+    if (gapFull > 1e-10 && (gapFull / gapHalf) > 0.95) {
+        return NaN; // Divergence by oscillation detected
     }
 
-    // 2. Calculate the absolute differences (deltas) between consecutive convergents
-    let deltas = [];
-    for (let i = 0; i < windowSize - 1; i++) {
-        deltas.push(Math.abs(convergents[i] - convergents[i + 1]));
-    }
-
-    // 3. Find the total spread in our window
-    let maxVal = Math.max(...convergents);
-    let minVal = Math.min(...convergents);
-    let spread = maxVal - minVal;
-
-    // 4. Check for oscillation vs. slow convergence
-    if (spread > 0.1) {
-        let isShrinking = true;
-        
-        // Check if the steps are getting progressively smaller
-        for (let i = 0; i < deltas.length - 1; i++) {
-            // deltas[0] is the newest difference, deltas[1] is older.
-            // If the newest difference is NOT smaller than the older one, it's not converging.
-            if (deltas[i] >= deltas[i + 1]) {
-                isShrinking = false;
-                break;
-            }
-        }
-        
-        // If the spread is large and the gaps aren't shrinking, it's oscillating
-        if (!isShrinking) {
-            return NaN; 
-        }
-    }
-
-    // If it passed the checks, return the most accurate convergent
-    return convergents[0]; 
+    // If it's still actively shrinking, return the best approximation
+    return compute(iterations); 
 }
 
 const exactContainer = document.getElementById('exactContainer');
@@ -994,7 +967,7 @@ const KNOWN_FORMULAS = {
             </span>
         </div>
     `,
-    "5n^2-4n+1|2n^3-4n^4": `
+    "n(5n-4)+1|-2n^3(2n-1)": `
         <div class="math-row">
             <span class="fraction-line-wrapper">
                 <span class="num">18</span>
@@ -1290,7 +1263,7 @@ const KNOWN_FORMULAS = {
             </span>
         </div>
     `,
-    "(3n^2-3n+1)(2n-1)|3n^6": `
+    "(n(3n-3)+1)(2n-1)|3n^6": `
         <div class="math-row">
             <span class="fraction-line-wrapper">
                 <span class="num flex-row gap-2">
@@ -1308,7 +1281,7 @@ const KNOWN_FORMULAS = {
             </span>
         </div>
     `,
-    "3n^2-3n+1|n^6": `
+    "n(3n-3)+1|n^6": `
         <div class="math-row">
             <span class="fraction-line-wrapper">
                 <span class="num">4</span>
@@ -1338,7 +1311,7 @@ const KNOWN_FORMULAS = {
             </span>
         </div>
     `,
-    "5n^2-5n+3|n^6": `
+    "n(5n-5)+3|n^6": `
         <div class="math-row">
             <span class="fraction-line-wrapper">
                 <span class="num">4</span>
@@ -2238,6 +2211,532 @@ const KNOWN_FORMULAS = {
             <span>1</span>
         </div>
     `,
+    "n|2n": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span>4</span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center">
+                        <i class="math-serif">e</i><sup class="sup-adjust" style="transform: translateY(-0.4em);">2</sup>
+                    </span>
+                    <span class="operator">&minus;</span>
+                    <span>5</span>
+                </span>
+            </span>
+        </div>
+    `,
+    "2|2n": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span>2</span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">e</i>
+                    
+                    <span class="sqrt-wrapper">
+                        <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                            <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                        </svg>
+                        <span class="radicand"><i class="math-serif">π</i></span>
+                    </span>
+                    
+                    <span>erfc(1)</span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "1+1/n|-1/(1+n)": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">e</i>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">e</i>
+                    <span class="operator">&minus;</span>
+                    <span>1</span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "2n-1|n^2+1": `
+        <div class="math-row flex-row items-center">
+            <span class="fraction-line-wrapper">
+                <span class="num px-4" style="display: grid; place-items: center;">
+                    <span style="grid-area: 1 / 1;">2</span>
+                    <span style="grid-area: 1 / 1; visibility: hidden; pointer-events: none;" class="flex-row items-center gap-2">
+                        <span class="flex-row items-center">
+                            <i class="math-serif">e</i>
+                            <sup class="sup-adjust" style="transform: translateY(-0.8em); margin-left: 0.1em;">
+                                <div class="fraction-line-wrapper text-sm" style="font-size: 0.75em;">
+                                    <span class="num inner-num"><i class="math-serif">π</i></span>
+                                    <span class="den pt-1">2</span>
+                                </div>
+                            </sup>
+                        </span>
+                        <span class="operator">&minus;</span>
+                        <span>1</span>
+                    </span>
+                </span>
+                <span class="den flex-row items-center gap-2 px-4">
+                    <span class="flex-row items-center">
+                        <i class="math-serif">e</i>
+                        <sup class="sup-adjust" style="margin-left: 0.1em;">
+                            <div class="fraction-line-wrapper text-sm" style="font-size: 0.75em; margin-bottom: 35px;">
+                                <span class="num inner-num"><i class="math-serif">π</i></span>
+                                <span class="den pt-1">2</span>
+                            </div>
+                        </sup>
+                    </span>
+                    <span class="operator">&minus;</span>
+                    <span>1</span>
+                </span>
+            </span>
+            <span class="operator mx-2">+</span>
+            <span>1</span>
+        </div>
+    `,
+    "2n(2n(6n+1)+5)-1|-4n(2n+1)^5": `
+        <div class="math-row flex-row items-center">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num px-4" style="display: grid; place-items: center;">
+                    <span style="grid-area: 1 / 1;">8</span>
+                    
+                    <span style="grid-area: 1 / 1; visibility: hidden; pointer-events: none;" class="flex-row items-center gap-2">
+                        <span class="flex-row items-center gap-1">
+                            <span>4</span>
+                            <span class="sqrt-wrapper">
+                                <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                    <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                                </svg>
+                                <span class="radicand">2</span>
+                            </span>
+                            <i class="math-serif">G</i>
+                        </span>
+                        
+                        <span class="operator">&minus;</span>
+                        <span>8</span>
+                        <span class="operator">+</span>
+                        
+                        <span class="flex-row items-center gap-1">
+                            <span class="sqrt-wrapper">
+                                <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                    <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                                </svg>
+                                <span class="radicand">2</span>
+                            </span>
+                            <i class="math-serif">π</i>
+                            <span>ln(2)</span>
+                        </span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>4</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">2</span>
+                        </span>
+                        <i class="math-serif">G</i>
+                    </span>
+                    
+                    <span class="operator">&minus;</span>
+                    <span>8</span>
+                    <span class="operator">+</span>
+                    
+                    <span class="flex-row items-center gap-1">
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">2</span>
+                        </span>
+                        <i class="math-serif">π</i>
+                        <span>ln(2)</span>
+                    </span>
+                </span>
+                
+            </span>
+            
+            <span class="operator mx-2">+</span>
+            <span>1</span>
+        </div>
+    `,
+    "5|(3n)^2": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span>9</span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span>9</span>
+                    
+                    <span class="operator">&minus;</span>
+                    
+                    <span class="flex-row items-center gap-1">
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                        <i class="math-serif">π</i>
+                    </span>
+                    
+                    <span class="operator">&minus;</span>
+                    
+                    <span class="flex-row items-center gap-1">
+                        <span>3</span>
+                        <span>ln(2)</span>
+                    </span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "9n-4|-6n(3n-1)": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span>1</span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center">
+                        <sup class="text-07" style="margin-right: -0.2em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">2</span>
+                        </span>
+                    </span>
+                    
+                    <span class="operator">&minus;</span>
+                    <span>1</span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "8n-2|(12n-1)(4n+1)": `
+        <div class="math-row flex-row items-center">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num px-4" style="display: grid; place-items: center;">
+                    <span style="grid-area: 1 / 1;">2</span>
+                    
+                    <span style="grid-area: 1 / 1; visibility: hidden; pointer-events: none;" class="flex-row items-center gap-2">
+                        <span class="flex-row items-center">
+                            <sup class="text-07" style="margin-right: -0.2em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                            <span class="sqrt-wrapper">
+                                <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                    <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                                </svg>
+                                <span class="radicand">2</span>
+                            </span>
+                        </span>
+                        
+                        <span class="operator">&minus;</span>
+                        <span>1</span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center">
+                        <sup class="text-07" style="margin-right: -0.5em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">2</span>
+                        </span>
+                    </span>
+                    
+                    <span class="operator">&minus;</span>
+                    <span>1</span>
+                </span>
+                
+            </span>
+            
+            <span class="operator mx-2">+</span>
+            <span>1</span>
+        </div>
+    `,
+    "10n-8|-(4n-3)(4n-1)": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center">
+                        <sup class="text-07" style="margin-right: -0.2em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">2</span>
+                        </span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span>2</span>
+                    <span class="operator">&minus;</span>
+                    
+                    <span class="flex-row items-center">
+                        <sup class="text-07" style="margin-right: -0.2em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">2</span>
+                        </span>
+                    </span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "30n-20|5-12n(12n+4)": `
+        <div class="math-row flex-row items-center gap-2 px-4">
+            
+            <span class="flex-row items-center">
+                <sup class="text-07" style="margin-right: -0.4em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                <span class="sqrt-wrapper">
+                    <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                        <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                    </svg>
+                    <span class="radicand">4</span>
+                </span>
+            </span>
+            
+            <span class="operator">+</span>
+            
+            <span class="flex-row items-center gap-1">
+                <span>2</span>
+                <span class="flex-row items-center">
+                    <sup class="text-07" style="margin-right: -0.4em; transform: translateY(-0.5em); z-index: 1;">3</sup>
+                    <span class="sqrt-wrapper">
+                        <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                            <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                        </svg>
+                        <span class="radicand">2</span>
+                    </span>
+                </span>
+            </span>
+            
+            <span class="operator">&minus;</span>
+            <span>1</span>
+            
+        </div>
+    `,
+    "72n-36|(36n^2-1)^2": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">π</i>
+                    <span class="operator">+</span>
+                    <span>3</span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">π</i>
+                    <span class="operator">&minus;</span>
+                    <span>3</span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "3n-2|n(1-2n)": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span>2</span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">π</i>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "6n-5|n^2(3n-2)^2": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>2</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">π</i>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "18n-9|(3n-1)^2(3n+1)^2": `
+        <div class="math-row flex-row items-center">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num px-4" style="display: grid; place-items: center;">
+                    <span style="grid-area: 1 / 1;">18</span>
+                    
+                    <span style="grid-area: 1 / 1; visibility: hidden; pointer-events: none;" class="flex-row items-center gap-2">
+                        <span class="flex-row items-center gap-1">
+                            <span>2</span>
+                            <span class="sqrt-wrapper">
+                                <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                    <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                                </svg>
+                                <span class="radicand">3</span>
+                            </span>
+                            <i class="math-serif">π</i>
+                        </span>
+                        
+                        <span class="operator">&minus;</span>
+                        <span>9</span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>2</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                        <i class="math-serif">π</i>
+                    </span>
+                    
+                    <span class="operator">&minus;</span>
+                    <span>9</span>
+                </span>
+                
+            </span>
+            
+            <span class="operator mx-2">+</span>
+            <span>1</span>
+        </div>
+    `,
+    "7n-5|-n(12n-6)": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>3</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>2</span>
+                        <i class="math-serif">π</i>
+                    </span>
+                </span>
+                
+            </span>
+        </div>
+    `,
+    "4n|3(2n-1)^2": `
+        <div class="math-row flex-row items-center">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>6</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                    </span>
+                </span>
+                
+                <span class="den px-4" style="display: grid; place-items: center;">
+                    <span style="grid-area: 1 / 1;">
+                        <i class="math-serif">π</i>
+                    </span>
+                    
+                    <span style="grid-area: 1 / 1; visibility: hidden; pointer-events: none;" class="flex-row items-center gap-1">
+                        <span>6</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                    </span>
+                </span>
+                
+            </span>
+            
+            <span class="operator mx-2">+</span>
+            <span>1</span>
+        </div>
+    `,
+    "5n-3|-2n(2n-1)": `
+        <div class="math-row flex-row items-center gap-8">
+            <span class="fraction-line-wrapper">
+                
+                <span class="num flex-row items-center justify-center gap-2 px-4">
+                    <span class="flex-row items-center gap-1">
+                        <span>3</span>
+                        <span class="sqrt-wrapper">
+                            <svg class="sqrt-tick" viewBox="0 0 12 22" preserveAspectRatio="none">
+                                <path d="M1,13 L3,13 L6,21 L11,0.5" stroke="currentColor" fill="none" stroke-width="1" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <span class="radicand">3</span>
+                        </span>
+                    </span>
+                </span>
+                
+                <span class="den flex-row items-center justify-center gap-2 px-4">
+                    <i class="math-serif">π</i>
+                </span>
+                
+            </span>
+        </div>
+    `,
 };
 
 function render() {
@@ -2418,5 +2917,90 @@ randomBtn.addEventListener('click', () => {
     render();
 });
 
+const suggestA = document.getElementById('suggestA');
+const suggestB = document.getElementById('suggestB');
+
+function updatePills(activeInput) {
+    const valA = inputA.value.replace(/\s+/g, '');
+    const valB = inputB.value.replace(/\s+/g, '');
+
+    suggestA.innerHTML = '';
+    suggestB.innerHTML = '';
+
+    // If BOTH are empty, stay quiet. 
+    if (!valA && !valB) return;
+
+    const formulas = Object.keys(KNOWN_FORMULAS);
+
+    const matches = formulas.filter(key => {
+        const [knownA, knownB] = key.split('|');
+        const cleanA = knownA.replace(/\s+/g, '');
+        const cleanB = knownB.replace(/\s+/g, '');
+
+        if (activeInput === 'A') {
+            const strictMatchB = valB === '' || cleanB === valB;
+            const fuzzyMatchA = valA === '' || cleanA.includes(valA);
+            return strictMatchB && fuzzyMatchA;
+        } else {
+            const strictMatchA = valA === '' || cleanA === valA;
+            const fuzzyMatchB = valB === '' || cleanB.includes(valB);
+            return strictMatchA && fuzzyMatchB;
+        }
+    });
+
+    if (matches.length === 0) return;
+
+    // Suggest for A if A is active (even if A is blank, as long as B has something)
+    if (activeInput === 'A') {
+        const suggestionsForA = [...new Set(matches.map(key => key.split('|')[0]))]
+            .filter(a => a.replace(/\s+/g, '') !== valA)
+            .slice(0, 3);
+
+        suggestionsForA.forEach(sug => {
+            const pill = document.createElement('button');
+            pill.className = 'suggestion-pill';
+            pill.textContent = sug;
+            pill.onclick = () => {
+                inputA.value = sug;
+                suggestA.innerHTML = '';
+                render();
+            };
+            suggestA.appendChild(pill);
+        });
+    }
+
+    // Suggest for B if B is active (even if B is blank, as long as A has something)
+    if (activeInput === 'B') {
+        const suggestionsForB = [...new Set(matches.map(key => key.split('|')[1]))]
+            .filter(b => b.replace(/\s+/g, '') !== valB)
+            .slice(0, 3);
+
+        suggestionsForB.forEach(sug => {
+            const pill = document.createElement('button');
+            pill.className = 'suggestion-pill';
+            pill.textContent = sug;
+            pill.onclick = () => {
+                inputB.value = sug;
+                suggestB.innerHTML = '';
+                render();
+            };
+            suggestB.appendChild(pill);
+        });
+    }
+}
+
+// Listeners tell the function which input is currently active
+inputA.addEventListener('input', () => updatePills('A'));
+inputB.addEventListener('input', () => updatePills('B'));
+inputA.addEventListener('focus', () => updatePills('A'));
+inputB.addEventListener('focus', () => updatePills('B'));
+
+// Clear pills when clicking outside the inputs
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.field')) {
+        suggestA.innerHTML = '';
+        suggestB.innerHTML = '';
+    }
+});
 
 render();
